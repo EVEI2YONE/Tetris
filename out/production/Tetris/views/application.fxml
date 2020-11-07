@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="640.0" prefWidth="530.0" styleClass="borderpane" stylesheets="@../stylesheets/stylesheet.css" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ApplicationController">
+   <center>
+      <Pane fx:id="game" focusTraversable="true" onKeyReleased="#onKeyReleased" prefWidth="228.0" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="20.0" />
+         </padding>
+         <styleClass>
+            <String fx:value="section" />
+            <String fx:value="game-section" />
+         </styleClass>
+      </Pane>
+   </center>
+   <right>
+      <VBox prefWidth="150.0" styleClass="section" BorderPane.alignment="CENTER">
+         <children>
+          <AnchorPane fx:id="nextPiece" maxHeight="100.0" minHeight="0.0" minWidth="100.0" prefHeight="85.0" prefWidth="100.0">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+               <children>
+                  <Pane prefHeight="80.0" prefWidth="151.0" styleClass="next-piece-section" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="162.0" prefWidth="140.0" styleClass="score-section">
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+               <children>
+                  <Label layoutX="40.0" layoutY="14.0" text="Score" />
+                  <Label fx:id="scoreLabel" layoutX="13.0" layoutY="59.0" prefHeight="45.0" prefWidth="123.0" textAlignment="CENTER" />
+               </children>
+            </AnchorPane>
+            <AnchorPane prefHeight="55.0" prefWidth="150.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" layoutX="43.0" layoutY="3.0" styleClass=".label" text="Stats" />
+               </children>
+            </AnchorPane>
+            <ListView fx:id="stats" editable="true" prefHeight="332.0" prefWidth="140.0">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </ListView>
+         </children>
+         <BorderPane.margin>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </BorderPane.margin>
+      </VBox>
+   </right>
+   <padding>
+      <Insets bottom="10.0" />
+   </padding>
+</BorderPane>

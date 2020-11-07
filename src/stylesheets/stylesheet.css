@@ -1,0 +1,24 @@
+.label {
+    -fx-text-fill: white;
+    -fx-font-size: 30px;
+}
+
+.borderpane {
+    -fx-background-color: #111111;
+}
+
+.section {
+    -fx-background-color: #222222;
+}
+
+.score-section {
+    -fx-background-color: #333333;
+}
+
+.next-piece-section {
+    -fx-background-color: #444444;
+}
+
+.game-section {
+    -fx-background-color: #555555;
+}
