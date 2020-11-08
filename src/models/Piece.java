@@ -22,7 +22,7 @@ public class Piece {
         for(Tetromino t : Tetromino.values())
             if(t.value == piece)
                 choice = t;
-
+        c = getNextColor();
         switch(choice) {
             case LINE: return Line();
             case L: return L();
@@ -53,48 +53,52 @@ public class Piece {
     static Color c;
     static Color[][] piece;
     private static Color[][] Line() {
-        c = getNextColor();
         piece = new Color[][]{
-            {null, c, null, null},
-            {null, c, null, null},
-            {null, c, null, null},
-            {null, c, null, null}
+            {null, null, null, null, null},
+            {null, null,    c, null, null},
+            {null, null,    c, null, null},
+            {null, null,    c, null, null},
+            {null, null,    c, null, null}
         };
         return piece;
     }
     private static Color[][] L() {
         piece = new Color[][]{
-            {null, null, null, null},
-            {null,    c, null, null},
-            {null,    c, null, null},
-            {null,    c,    c, null}
+            {null, null, null, null, null},
+            {null, null,    c, null, null},
+            {null, null,    c, null, null},
+            {null, null,    c,    c, null},
+            {null, null, null, null, null}
         };
         return piece;
     }
     private static Color[][] Z() {
         piece = new Color[][]{
-            {null, null, null, null},
-            {   c,    c, null, null},
-            {null,    c,    c, null},
-            {null, null, null, null}
+            {null, null, null, null, null},
+            {null, null, null, null, null},
+            {null,    c,    c, null, null},
+            {null, null,    c,    c, null},
+            {null, null, null, null, null}
         };
         return piece;
     }
     private static Color[][] Plus() {
         piece = new Color[][]{
-            {null,    c, null, null},
-            {   c,    c, null, null},
-            {null,    c, null, null},
-            {null, null, null, null}
+            {null, null, null, null, null},
+            {null, null,    c, null, null},
+            {null, null,    c,    c, null},
+            {null, null,    c, null, null},
+            {null, null, null, null, null}
         };
         return piece;
     }
     private static Color[][] Square() {
         piece = new Color[][]{
-            {null, null, null, null},
-            {null,    c,    c, null},
-            {null,    c,    c, null},
-            {null, null, null, null}
+            {null, null, null, null, null},
+            {null, null, null, null, null},
+            {null, null,    c,    c, null},
+            {null, null,    c,    c, null},
+            {null, null, null, null, null}
         };
         return piece;
     }

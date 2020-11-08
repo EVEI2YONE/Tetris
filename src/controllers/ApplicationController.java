@@ -49,7 +49,6 @@ public class ApplicationController {
         }
         if(event.getCode() == KeyCode.R) {
             tetris.stop();
-            tetris.start();
         }
     }
 }
