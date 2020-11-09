@@ -6,8 +6,7 @@ import javafx.scene.shape.Rectangle;
 
 public class NextPieceSection {
     Rectangle[][] rectangles;
-    public boolean
-        generated = false;
+    Piece nextPiece;
     private int
         xstart = 570,
         ystart = 11,
@@ -30,26 +29,20 @@ public class NextPieceSection {
         }
         return group;
     }
-    public boolean isGenerated() { return generated; }
     public void generate() {
-        int option = Tetris.random.nextInt(5);
-        Color[][] piece = Piece.getPiece(option);
-        for(int i = 0; i < piece.length; i++)
-            for(int j = 0; j < piece[0].length; j++) {
-                Color c = piece[i][j];
+        nextPiece = PieceFactory.getPiece();
+        Color[][] shape = nextPiece.getShape();
+        for(int i = 0; i < shape.length; i++)
+            for(int j = 0; j < shape[0].length; j++) {
+                Color c = shape[i][j];
                 rectangles[i][j].setFill(c);
                 if(c != null)
                     rectangles[i][j].setStroke(Color.BLACK);
                 else
                     rectangles[i][j].setStroke(null);
             }
-        generated = true;
     }
-    public Color[][] load() {
-        Color[][] color = new Color[rows][cols];
-        for(int i = 0; i < color.length; i++)
-            for(int j = 0; j < color[0].length; j++)
-                color[i][j] = (Color) rectangles[i][j].getFill();
-        return color;
+    public Piece load() {
+        return nextPiece;
     }
 }
