@@ -1,8 +1,6 @@
 package models;
 
-import controllers.ApplicationController;
 import javafx.scene.Group;
-import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
