@@ -40,16 +40,24 @@ public class ApplicationController {
         return nextSection;
     }
 
+    public void onKeyPressed(KeyEvent event) {
+        switch(event.getCode()) {
+            case A: tetris.shift(-1); break;
+            case D: tetris.shift(1); break;
+        }
+    }
+
     public void onKeyReleased(KeyEvent event) {
         switch(event.getCode()) {
             case K: tetris.start(); break;
             case R: tetris.stop(); break;
             case W: tetris.rotate(1); break;
-            case A: tetris.shift(-1); break;
+//            case A: tetris.shift(-1); break;
             case S: tetris.rotate(-1); break;
-            case D: tetris.shift(1); break;
+//            case D: tetris.shift(1); break;
             case SPACE: tetris.quickMove(); break;
         }
+        System.out.println(event.getCode());
         event.consume();
     }
 }

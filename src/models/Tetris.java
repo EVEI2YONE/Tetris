@@ -24,11 +24,13 @@ public class Tetris {
         rows = 14,
         cols = 11,
         len = 45,
-        regular = 125,
+        regular = 17,
         quick = 5,
         rate = regular,
         rotation = 0,
-        shift = 0;
+        shift = 0,
+        ticks = 0,
+        fps = 45;
     /*
         TODO:
             FIX PIECE MOVING DOWN
@@ -42,8 +44,10 @@ public class Tetris {
 
     public void rotate(int i) {
         rotation = i;
+        return;
     }
     public void shift(int i) {
+        if(shift != 0) return;
         shift = i;
     }
     public void quickMove() {
@@ -95,6 +99,13 @@ public class Tetris {
         if(x+xRight >= board[0].length) return false;
         return true;
     }
+    public boolean inYBounds() {
+        int y = piece.y-2;
+        //check height bounds
+        int yOff = getYOffset(piece);
+        if((y+2)+yOff >= rows) return false;
+        return true;
+    }
     public boolean overflow(){
         int yHeight = 0;
         Color[][] shape = piece.getShape();
@@ -110,7 +121,7 @@ public class Tetris {
                     }
                 }
             }
-        }catch(Exception ex) { ex.printStackTrace(); }
+        }catch(Exception ex) { }//ex.printStackTrace(); }
         int height = piece.y-yHeight;
         if(height >= 0) return false;
         return true;
@@ -148,9 +159,7 @@ public class Tetris {
         int
             x = piece.x-2,
             y = piece.y-2;
-        //check height bounds
-        int yOff = getYOffset(piece);
-        if((y+2)+yOff >= rows-1) return false;
+        if(!inYBounds()) return false;
         //look ahead for all columns -> collision detection
         Color[][]shape = piece.getShape();
         for(int i = 0; i < shape.length; i++) {
@@ -252,17 +261,41 @@ public class Tetris {
         //gets copy from the next piece section
         loadPieces();
         //start from top
-        while(canMoveDown() && running) {// && inBounds(x, y, piece)) {
-            int tempX = 0, tempY = 1;
-            if(shift != 0 && canMoveAcross(shift)) {
+        boolean stacked = false;
+        while(running) {
+            int tempX = 0, tempY = 0;
+            if(canMoveAcross(shift)) {
                 tempX = shift;
             }
-            updatePiece(tempX, tempY);
+            if(ticks == fps) {
+                ticks = 0;
+                if(!canMoveDown() && !stacked)
+                    updatePiece(tempX, 1);
+                else if(!canMoveDown() && !inYBounds())
+                    break;
+                else if(!canMoveDown() && stacked)
+                    break;
+                else
+                    updatePiece(tempX, 1);
+            }
+            else {
+                updatePiece(tempX, 0);
+            }
+            if(!canMoveDown())
+                stacked = true;
+            else
+                stacked = false;
             //sleep after change otherwise, visuals will show nothing
             sleep();
+            ticks++;
         }
-        updatePiece(0, 1);
+        if(!inYBounds())
+            updatePiece(0, -1);
+        else
+            updatePiece(0, 0);
+        clearPiece();
         sleep();
+        drawPiece();
         playing = false;
         if(overflow()) {
             stop();
@@ -273,10 +306,11 @@ public class Tetris {
             while (running) {
                 quickMove = false;
                 rate = regular;
+                System.out.println("playing piece");
                 playPiece();
             }
         }catch(Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
