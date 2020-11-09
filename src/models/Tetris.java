@@ -27,10 +27,9 @@ public class Tetris {
         rows = 14,
         cols = 11,
         len = 45,
-        regular = 250,
+        regular = 125,
         quick = 5,
         rate = regular;
-
 
     public void rotate(int i) {
         rotated = true;
@@ -66,7 +65,7 @@ public class Tetris {
         for(int i = 0; i < shape[0].length; i++) {
             if(flag) break;
             for(int j = 0; j < shape.length; j++) {
-                if(shape[i][j] != null) {
+                if(shape[j][i] != null) {
                     xLeft = i;
                     flag = true;
                     break;
@@ -78,7 +77,7 @@ public class Tetris {
         for(int i = shape[0].length-1; i >= shape.length/2; i--) {
             if(flag) break;
             for(int j = 0; j < shape.length; j++) {
-                if(shape[i][j] != null) {
+                if(shape[j][i] != null) {
                     xRight = i;
                     flag = true;
                     break;
@@ -86,9 +85,9 @@ public class Tetris {
             }
         }
         //check xOffsets
-        if(x+xLeft < 0) return true;
-        if(x+xRight >= shape[0].length) return true;
-        return false;
+        if(x+xLeft < 0) return false;
+        if(x+xRight >= board[0].length) return false;
+        return true;
     }
     public boolean overflow(){
         int yHeight = 0;
@@ -135,7 +134,7 @@ public class Tetris {
         return true;
     }
     public boolean canMoveAcross(int dir) { //check left and right
-        //if(!inXBounds(dir)) return false; //check bounds
+        if(!inXBounds(dir)) return false; //check bounds
         if(canShift(dir)) return true;
         return false;
     }
@@ -250,7 +249,7 @@ public class Tetris {
         //gets copy from the next piece section
         loadPieces();
         //start from top
-        while(canMoveDown()) {// && inBounds(x, y, piece)) {
+        while(canMoveDown() || shifted) {// && inBounds(x, y, piece)) {
             movePiece();
             prevPiece.y += (piece.y - prevPiece.y);
             prevPiece.x += (piece.x - prevPiece.x);
