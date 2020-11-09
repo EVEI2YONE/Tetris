@@ -37,15 +37,13 @@ public class PieceFactory {
     }
     public static Color getNextColor() {
         int
-                offset = 30,
-                limit = 255-(offset*2),
-                r = rng.nextInt(limit)+offset,
-                g = rng.nextInt(limit)+offset,
-                b = rng.nextInt(limit)+offset;
+            offset = 200,
+            limit = 255,
+            r = limit - rng.nextInt(offset),
+            g = limit - rng.nextInt(offset),
+            b = limit - rng.nextInt(offset);
         double
-                o = (rng.nextDouble()); //0 is transparent
-        if(o < .7) o += .29;
-        else if(o > .8) o -= .2;
+            o = .7 + .3 * (rng.nextDouble()); //0 is transparent
         return Color.rgb(r, g, b, o);
     }
 

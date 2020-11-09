@@ -37,30 +37,19 @@ public class ApplicationController {
         tetris.setNextPieceSection(piece);
         Group nextSection = piece.initSection();
         piece.generate();
-         return nextSection;
+        return nextSection;
     }
 
     public void onKeyReleased(KeyEvent event) {
-        if(event.getCode() == KeyCode.K) {
-            tetris.start();
+        switch(event.getCode()) {
+            case K: tetris.start(); break;
+            case R: tetris.stop(); break;
+            case W: tetris.rotate(1); break;
+            case A: tetris.shift(-1); break;
+            case S: tetris.rotate(-1); break;
+            case D: tetris.shift(1); break;
+            case SPACE: tetris.quickMove(); break;
         }
-        if(event.getCode() == KeyCode.R) {
-            tetris.stop();
-        }
-        if(event.getCode() == KeyCode.LEFT) {
-            System.out.println("LEFT");
-        }
-        if(event.getCode() == KeyCode.RIGHT) {
-            System.out.println("RIGHT");
-        }
-        if(event.getCode() == KeyCode.UP) {
-            System.out.println("UP");
-        }
-        if(event.getCode() == KeyCode.DOWN) {
-            System.out.println("DOWN");
-        }
-        if(event.getCode() == KeyCode.SPACE) {
-            System.out.println("SPACE");
-        }
+        event.consume();
     }
 }
