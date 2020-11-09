@@ -1,6 +1,8 @@
 package models;
 
+import controllers.ApplicationController;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
@@ -17,20 +19,21 @@ public class Tetris {
     private boolean
         playing = false,
         update = false,
-        quickMove = false;
+        quickMove = false,
+        sync = false;
     private int
         xstart = 10,
         ystart = 10,
         rows = 14,
         cols = 11,
         len = 45,
-        regular = 17,
-        quick = 5,
+        regular = 10,
         rate = regular,
         rotation = 0,
         shift = 0,
         ticks = 0,
-        fps = 45;
+        tickRate = 1,
+        fps = 25;
     /*
         TODO:
             FIX PIECE MOVING DOWN
@@ -43,8 +46,8 @@ public class Tetris {
      */
 
     public void rotate(int i) {
+        if(rotation != 0) return;
         rotation = i;
-        return;
     }
     public void shift(int i) {
         if(shift != 0) return;
@@ -52,7 +55,7 @@ public class Tetris {
     }
     public void quickMove() {
         if(quickMove) return;
-        rate = quick;
+        tickRate = fps;
         quickMove = true;
     }
 
@@ -106,6 +109,13 @@ public class Tetris {
         if((y+2)+yOff >= rows) return false;
         return true;
     }
+    public boolean atEdge() {
+        int y = piece.y-2;
+        //check height bounds
+        int yOff = getYOffset(piece);
+        if((y+2)+yOff == rows-1) return true;
+        return false;
+    }
     public boolean overflow(){
         int yHeight = 0;
         Color[][] shape = piece.getShape();
@@ -125,6 +135,30 @@ public class Tetris {
         int height = piece.y-yHeight;
         if(height >= 0) return false;
         return true;
+    }
+    public boolean collisionDetected() { //check below
+        int
+                x = piece.x-2,
+                y = piece.y-2;
+        //look ahead for all columns -> collision detection
+        Color[][]shape = piece.getShape();
+        for(int i = 0; i < shape.length; i++) {
+            for(int j = 0; j < shape[0].length; j++) {
+                try {
+                    int xPos = x+j, yPos = y+i;
+                    Color currentColor = shape[i][j],
+                            nextColor = (Color) board[yPos+1][xPos].getFill();
+                    //ignore empty spaces
+                    if(currentColor == null) continue;
+                    //prevent seeing parts of its own piece
+                    if (currentColor == nextColor) continue;
+                    //checks if next spot is open -> return false on first instance
+                    if (nextColor != null)
+                        return true;
+                } catch (Exception ex) { }
+            }
+        }
+        return false;
     }
     public boolean canShift(int dx){
         int
@@ -155,39 +189,97 @@ public class Tetris {
         if(canShift(dir)) return true;
         return false;
     }
-    public boolean canMoveDown() { //check below
+    public boolean canRotate(int i) {
+        Piece copy = piece.copy();
+        System.out.println(copy);
+        copy.rotatePiece(i);
+        System.out.println(copy);
+        if(overlaps(copy)) return false;
+        return true;
+    }
+    public boolean overlaps(Piece copy) {
         int
-            x = piece.x-2,
-            y = piece.y-2;
-        if(!inYBounds()) return false;
-        //look ahead for all columns -> collision detection
-        Color[][]shape = piece.getShape();
+            x = copy.x-2,
+            y = copy.y-2;
+        Color[][] shape = copy.getShape();
+        Color c = getColor(copy);
         for(int i = 0; i < shape.length; i++) {
             for(int j = 0; j < shape[0].length; j++) {
                 try {
-                    int xPos = x+j, yPos = y+i;
-                    Color currentColor = shape[i][j],
-                        nextColor = (Color) board[yPos+1][xPos].getFill();
-                    //ignore empty spaces
-                    if(currentColor == null) continue;
-                    //prevent seeing parts of its own piece
-                    if (currentColor == nextColor) continue;
-                    //checks if next spot is open -> return false on first instance
-                    if (nextColor != null)
-                        return false;
-                } catch (Exception ex) { }
+                    int xPos = x + j, yPos = y + i;
+                    if (shape[i][j] == null) continue;
+                    if (board[yPos][xPos].getFill() != null) return true;
+                }catch(Exception ex) { }
             }
         }
-        return true;
+        return false;
+    }
+    public Color getColor(Piece temp){
+        for(Color[] row : temp.getShape())
+            for(Color col : row)
+                if(col != null)
+                    return col;
+        return null;
+    }
+    public boolean canUpdate() {
+        if(collisionDetected())
+            return false;
+        else if(atEdge())
+            return false;
+        else
+            return true;
     }
 
+    public void updateScore(int rowsCleared) {
+        int score = 0;
+        switch(rowsCleared) {
+            case 1: score = 50; break;
+            case 2: score = 150; break;
+            case 3: score = 275; break;
+            case 4: score = 425; break;
+        }
+        int current = Integer.parseInt(Main.getController().getLabel().getText());
+        current += score;
+        try {
+            Main.getController().getLabel().setText(current + "");
+        }catch(Exception ex) { }
+        System.out.println("Current score: " + current);
+    }
+    public void lowerRows(int r) {
+        for(int i = r; i >= 0; i--) {
+            for(int j = 0; j < cols; j++) {
+                if(i == 0) {
+                    board[i][j].setFill(null);
+                }else {
+                    board[i][j].setFill(board[i-1][j].getFill());
+                }
+            }
+        }
+    }
+    public int clearRows() {
+        int rowsCleared = 0;
+        for(int i = rows-1; i >= 0; i--) {
+            int count = 0;
+            for(int j = 0; j < cols; j++) {
+                if(board[i][j].getFill() != null)
+                    count++;
+            }
+            if(count == cols) {
+                lowerRows(i);
+                rowsCleared++;
+                i++;
+            }
+        }
+        return rowsCleared;
+    }
+    public void adjustRotation() {} //TODO: FIX ROTATION ADJUSTMENT (OFF-SCREEN AND/OR COLLISION)
     public void updateChange() {
         if(shift != 0) {
             prevPiece = piece.copy();
             shift = 0;
         }
         if(rotation != 0) {
-
+            prevPiece = piece.copy();
             rotation = 0;
         }
     }
@@ -259,42 +351,46 @@ public class Tetris {
         if(playing) return;
         playing = true;
         //gets copy from the next piece section
+        //sleep();
         loadPieces();
         //start from top
         boolean stacked = false;
         while(running) {
-            int tempX = 0, tempY = 0;
+            int tempX = 0, tempY = 1;
             if(canMoveAcross(shift)) {
                 tempX = shift;
+                tempY = 0;
             }
-            if(ticks == fps) {
-                ticks = 0;
-                if(!canMoveDown() && !stacked)
-                    updatePiece(tempX, 1);
-                else if(!canMoveDown() && !inYBounds())
-                    break;
-                else if(!canMoveDown() && stacked)
-                    break;
+            if(rotation != 0) {
+                clearPiece();
+                //TODO: FIX ROTATION ADJUSTMENT
+                if(canRotate(rotation)) {
+                    piece.rotatePiece(rotation);
+                    adjustRotation();
+                }
+                drawPiece();
+                updatePiece(0, 0);
+                tempY = 0;
+            }
+            if(sync) {
+                sync = false;
+                if(canUpdate())
+                    updatePiece(0, 1);
                 else
-                    updatePiece(tempX, 1);
+                    break;
             }
-            else {
-                updatePiece(tempX, 0);
+            else if(shift != 0 || rotation != 0){
+                updatePiece(tempX, tempY);
             }
-            if(!canMoveDown())
-                stacked = true;
-            else
-                stacked = false;
             //sleep after change otherwise, visuals will show nothing
-            sleep();
-            ticks++;
+            //sleep();
         }
         if(!inYBounds())
             updatePiece(0, -1);
         else
             updatePiece(0, 0);
         clearPiece();
-        sleep();
+        //sleep();
         drawPiece();
         playing = false;
         if(overflow()) {
@@ -304,21 +400,35 @@ public class Tetris {
     public void run() {
         try {
             while (running) {
+                tickRate = 1;
                 quickMove = false;
                 rate = regular;
-                System.out.println("playing piece");
                 playPiece();
+                int rowsCleared = clearRows();
+                updateScore(rowsCleared);
             }
         }catch(Exception e) {
             //e.printStackTrace();
         }
     }
 
+    public void clock() {
+        while(running) {
+            if(ticks >= fps) {
+                sync = true;
+                ticks = 0;
+            }
+            try { sleep(); } catch(Exception ex) {}
+            ticks += tickRate;
+        }
+    }
     public void start() {
         if(running) return;
         running = true;
         Thread thread = new Thread(this::run);
         thread.start();
+        Thread clock = new Thread(this::clock);
+        clock.start();
     }
     public void stop() {
         running = false;

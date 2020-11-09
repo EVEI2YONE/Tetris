@@ -1,5 +1,6 @@
 package controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -13,7 +14,6 @@ import models.NextPieceSection;
 import models.Tetris;
 
 public class ApplicationController {
-
     Tetris tetris = new Tetris();
     NextPieceSection piece = new NextPieceSection();
     @FXML
@@ -52,12 +52,13 @@ public class ApplicationController {
             case K: tetris.start(); break;
             case R: tetris.stop(); break;
             case W: tetris.rotate(1); break;
-//            case A: tetris.shift(-1); break;
             case S: tetris.rotate(-1); break;
-//            case D: tetris.shift(1); break;
             case SPACE: tetris.quickMove(); break;
         }
-        System.out.println(event.getCode());
         event.consume();
+    }
+
+    public Label getLabel() {
+        return  scoreLabel;
     }
 }

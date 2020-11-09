@@ -47,7 +47,6 @@ public class PieceFactory {
             o = alpha + (1-alpha) * (rng.nextDouble()); //0 is transparent
         return Color.rgb(r, g, b, o);
     }
-
     static Color c;
     static Color[][] shape;
     private static Color[][] Line() {
