@@ -16,11 +16,8 @@ public class Tetris {
         running = false;
     private boolean
         playing = false,
-        move = false,
         update = false,
-        quickMove = false,
-        rotated = false,
-        shifted = false;
+        quickMove = false;
     private int
         xstart = 10,
         ystart = 10,
@@ -29,17 +26,26 @@ public class Tetris {
         len = 45,
         regular = 125,
         quick = 5,
-        rate = regular;
+        rate = regular,
+        rotation = 0,
+        shift = 0;
+    /*
+        TODO:
+            FIX PIECE MOVING DOWN
+            CHECK BOUNDS OF THE PIECE (X RANGE and Y MAX)
+            ROTATION (LEFT AND RIGHT) -> UPDATING ROTATED PIECE
+            SHIFT PIECE(LEFT AND RIGHT) -> UPDATING ROATED PIECE
+
+        TODO:
+            IMPLEMENT SCORE SYSTEM -> UPDATE SCORE LABEL
+     */
 
     public void rotate(int i) {
-        rotated = true;
+        rotation = i;
     }
     public void shift(int i) {
-        if(!canMoveAcross(i)) return;
-        shifted = true;
-        piece.x += i;
+        shift = i;
     }
-
     public void quickMove() {
         if(quickMove) return;
         rate = quick;
@@ -165,25 +171,18 @@ public class Tetris {
         }
         return true;
     }
-    /*TODO: FIX PIECE MOVING DOWN
-            CHECK BOUNDS OF THE PIECE (X RANGE and Y MAX)
-            ROTATION (LEFT AND RIGHT) -> UPDATING ROTATED PIECE
-            SHIFT PIECE(LEFT AND RIGHT) -> UPDATING ROATED PIECE
-
-      TODO: IMPLEMENT SCORE SYSTEM -> UPDATE SCORE LABEL
-     */
 
     public void updateChange() {
-        if(shifted) {
+        if(shift != 0) {
             prevPiece = piece.copy();
-            shifted = false;
+            shift = 0;
         }
-        if(rotated) {
+        if(rotation != 0) {
 
-            rotated = false;
+            rotation = 0;
         }
     }
-    public void updatePiece() {
+    public void drawPiece() {
         int
             x = piece.x-2,
             y = piece.y-2;
@@ -222,14 +221,18 @@ public class Tetris {
         }
         update = true;
     }
-    public void movePiece() {
+    public void updatePiece(int x, int y) {
         update = false;
-        sleep();
         Thread clear = new Thread(() -> clearPiece());
         clear.start();
+        //used to wait for previous position to be cleared
         while(!update && running) { }
         updateChange();
-        updatePiece();
+        drawPiece();
+        prevPiece.y += (piece.y - prevPiece.y);
+        prevPiece.x += (piece.x - prevPiece.x);
+        piece.y += y;
+        piece.x += x;
     }
     public void loadPieces() {
         piece = next.load();
@@ -249,14 +252,17 @@ public class Tetris {
         //gets copy from the next piece section
         loadPieces();
         //start from top
-        while(canMoveDown() || shifted) {// && inBounds(x, y, piece)) {
-            movePiece();
-            prevPiece.y += (piece.y - prevPiece.y);
-            prevPiece.x += (piece.x - prevPiece.x);
-            if(!shifted)
-                piece.y++;
+        while(canMoveDown() && running) {// && inBounds(x, y, piece)) {
+            int tempX = 0, tempY = 1;
+            if(shift != 0 && canMoveAcross(shift)) {
+                tempX = shift;
+            }
+            updatePiece(tempX, tempY);
+            //sleep after change otherwise, visuals will show nothing
+            sleep();
         }
-        movePiece();
+        updatePiece(0, 1);
+        sleep();
         playing = false;
         if(overflow()) {
             stop();
@@ -273,20 +279,20 @@ public class Tetris {
             e.printStackTrace();
         }
     }
-    public void sleep() {
-        try { Thread.sleep(rate); } catch(Exception ex) { }
-    }
+
     public void start() {
         if(running) return;
         running = true;
         Thread thread = new Thread(this::run);
         thread.start();
     }
-
     public void stop() {
         running = false;
         sleep();
         clearGame();
+    }
+    public void sleep() {
+        try { Thread.sleep(rate); } catch(Exception ex) { }
     }
     public void clearGame() {
         for(Rectangle[] r : board) {
