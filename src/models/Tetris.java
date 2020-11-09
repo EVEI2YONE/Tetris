@@ -8,8 +8,7 @@ import javafx.scene.shape.Rectangle;
 import java.util.Random;
 
 public class Tetris {
-    private static long seed = 1;
-    public final static Random random = new Random(seed);
+    Random random = PieceFactory.rng;
     NextPieceSection next;
     Rectangle[][] board;
     Piece piece, prevPiece;
@@ -28,10 +27,8 @@ public class Tetris {
         len = 45,
         rate = 150;
 
-    static int row = 0;
-    static int col = 0;
 
-    int count;
+
     public int getYOffset(Piece piece) { //height
         Color[][] shape = piece.getShape();
         int len = shape.length;
@@ -63,9 +60,10 @@ public class Tetris {
         }
         return true;
     }
-    public boolean canMoveDown(int x, int y, Piece piece) {
-        x -= 2;
-        y -= 2;
+    public boolean canMoveDown() {
+        int
+            x = piece.x-2,
+            y = piece.y-2;
         int yOff = getYOffset(piece);
         Color[][]shape = piece.getShape();
         //check height bounds
@@ -87,7 +85,6 @@ public class Tetris {
                 } catch (Exception ex) { }
             }
         }
-        count++;
         return true;
     }
     /*TODO: FIX PIECE MOVING DOWN
@@ -98,92 +95,89 @@ public class Tetris {
       TODO: IMPLEMENT SCORE SYSTEM -> UPDATE SCORE LABEL
      */
 
-    private int
-        dx = 0, //-1 <= dx <= 1
-        dy = 0; // 0 <= dy <= 1
-    public void clearPiece(Piece piece) {
-        if(piece == null) return;
-        x -= 2;
-        y -= 2;
-        //TODO: FIX UPDATING PIECE'S PREVIOUS POSITION (OVERWRITES FILL)
-        //clear piece's previous position
-        for(int i = 0; i < piece.length; i++) {
-            for(int j = 0; j < piece[0].length; j++) {
+    public void updatePiece() {
+        int
+            x = piece.x-2,
+            y = piece.y-2;
+        Color[][] shape = piece.getShape();
+        for(int i = 0; i < shape.length; i++) {
+            for(int j = 0; j < shape[0].length; j++) {
                 int xPos = x+j, yPos = y+i;
-                if(piece[i][j] == null) continue;
+                if(shape[i][j] == null) continue;
+                try {
+                    board[yPos][xPos].setFill(shape[i][j]);
+                }catch(Exception ex) {}
+            }
+        }
+        update = false;
+    }
+    public void clearPiece() {
+        if(prevPiece == null) {
+            update = true;
+            return;
+        }
+        int
+            x = prevPiece.x-2,
+            y = prevPiece.y-2;
+        //TODO: FIX UPDATING PIECE'S PREVIOUS POSITION (OVERWRITES FILL)
+        Color[][] shape = prevPiece.getShape();
+        //clear piece's previous position
+        for(int i = 0; i < shape.length; i++) {
+            for(int j = 0; j < shape[0].length; j++) {
+                int xPos = x+j, yPos = y+i;
+                if(shape[i][j] == null) continue;
                 //if(board[xPos][yPos].getFill() != piece[i][j]) continue;
                 try {
                     board[yPos][xPos].setFill(null);
                 }catch(Exception ex) {}
             }
         }
+        update = true;
     }
-    public void updatePiece(Piece piece) {
-        x -= 2;
-        y -= 2;
-        for(int i = 0; i < piece.length; i++) {
-            for(int j = 0; j < piece[0].length; j++) {
-                int xPos = x+j, yPos = y+i;
-                if(piece[i][j] == null) continue;
-                try {
-                    board[yPos][xPos].setFill(piece[i][j]);
-                }catch(Exception ex) {}
-            }
-        }
-    }
-
     public void movePiece() {
-        Thread clear = new Thread(() -> clearPiece(piece));
-        clear.start();
+        update = false;
         sleep();
+        Thread clear = new Thread(() -> clearPiece());
+        clear.start();
+        while(!update && running) { }
         //clearPiece(px, py, prevPiece);
-        updatePiece(prevPiece);
+        updatePiece();
     }
-
+    public void loadPieces() {
+        piece = next.load();
+        next.generate();
+        int
+            yOff = getYOffset(piece),
+            x = random.nextInt(cols-2)+1,//(cols/2),
+            y = 0 - yOff -1; //starting point <- -1 is for the initial increment from the clock
+        piece.x = x;
+        piece.y = y;
+        prevPiece = piece.copy();
+        prevPiece.y--;
+    }
     public void playPiece() {
-        /*
+
         if(playing) return;
         playing = true;
         //gets copy from the next piece section
-        prevPiece = piece;
-        piece = next.load();
-        next.generate();
-        update = false;
-        int
-            yOff = getYOffset(piece),
-            _x = random.nextInt(cols-2)+1,//(cols/2),
-            _y = 0 - yOff, //starting point
-            py = _y-1, //TODO: POTENTIAL ISSUE HERE WITH CLOCK UPDATING _Y, PY AND AFTER NEW PIECE IS LOADED
-            px = _x,
-            moves = 0;
-        update = true;
+        loadPieces();
+        int moves = 0;
         //start from top
-        while(moves < rows) { //canMoveDown(_x, _y, piece)) {// && inBounds(x, y, piece)) {
-            //while(!move) { }
+        while(canMoveDown()) {// && inBounds(x, y, piece)) {
             movePiece();
-            move = false;
             moves++;
+            prevPiece.y++;
+            piece.y++;
         }
         movePiece();
         playing = false;
         if(moves == 0) {
-            //gameOver();
             stop();
         }
-         */
-    }
-
-    public void recolor() {
-        if (row >= board.length)
-            row = 0;
-        if (col >= board[0].length)
-            col = 0;
-        board[row++][col++].setFill(PieceFactory.getNextColor());
     }
     public void run() {
         try {
             while (running) {
-                sleep();
                 playPiece();
             }
         }catch(Exception e) {
@@ -196,12 +190,13 @@ public class Tetris {
     public void clock() {
         while(running) {
             try {
-                move = true;
-                while(!update && move == true) { }
+//                move = true;
+                while(!update) { }
                 Thread.sleep(rate);
-                py = _y;
-                _y++;
-                move = false;
+                if(prevPiece != null)
+                    prevPiece.y++;
+                piece.y++;
+//                move = false;
             } catch (Exception ex) {
             }
         }
@@ -211,8 +206,8 @@ public class Tetris {
         running = true;
         Thread thread = new Thread(this::run);
         thread.start();
-        Thread thread2 = new Thread(this::clock);
-        thread2.start();
+        //Thread thread2 = new Thread(this::clock);
+        //thread2.start();
     }
 
     public void stop() {

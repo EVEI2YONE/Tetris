@@ -5,34 +5,22 @@ import javafx.scene.paint.Color;
 import java.util.Random;
 
 public class Piece {
-    private int x, y;
-
-    public int getX() {
-        return x;
-    }
-    public void setX(int x) {
-        this.x = x;
-    }
-    public int getY() {
-        return y;
-    }
-    public void setY(int y) {
-        this.y = y;
-    }
-    public Color[][] getShape() {
-        return shape;
-    }
-    public void setShape(Color[][] shape) {
-        this.shape = shape;
-    }
-
+    public int x, y;
     private Color[][] shape;
+
     public Piece(int x, int y) {
         this.x = x;
         this.y = y;
     }
     public Piece(Color[][] piece) {
         shape = piece;
+    }
+
+    public Color[][] getShape() {
+        return shape;
+    }
+    public void setShape(Color[][] shape) {
+        this.shape = shape;
     }
 
     public Piece copy() {
