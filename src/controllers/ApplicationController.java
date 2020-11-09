@@ -39,9 +39,6 @@ public class ApplicationController {
         piece.generate();
          return nextSection;
     }
-    public void onKeyTyped(KeyEvent event) {
-
-    }
 
     public void onKeyReleased(KeyEvent event) {
         if(event.getCode() == KeyCode.K) {
@@ -49,6 +46,21 @@ public class ApplicationController {
         }
         if(event.getCode() == KeyCode.R) {
             tetris.stop();
+        }
+        if(event.getCode() == KeyCode.LEFT) {
+            System.out.println("LEFT");
+        }
+        if(event.getCode() == KeyCode.RIGHT) {
+            System.out.println("RIGHT");
+        }
+        if(event.getCode() == KeyCode.UP) {
+            System.out.println("UP");
+        }
+        if(event.getCode() == KeyCode.DOWN) {
+            System.out.println("DOWN");
+        }
+        if(event.getCode() == KeyCode.SPACE) {
+            System.out.println("SPACE");
         }
     }
 }

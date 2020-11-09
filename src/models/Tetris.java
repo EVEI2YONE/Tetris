@@ -1,6 +1,5 @@
 package models;
 
-import controllers.ApplicationController;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -187,27 +186,11 @@ public class Tetris {
     public void sleep() {
         try { Thread.sleep(rate); } catch(Exception ex) { }
     }
-    public void clock() {
-        while(running) {
-            try {
-//                move = true;
-                while(!update) { }
-                Thread.sleep(rate);
-                if(prevPiece != null)
-                    prevPiece.y++;
-                piece.y++;
-//                move = false;
-            } catch (Exception ex) {
-            }
-        }
-    }
     public void start() {
         if(running) return;
         running = true;
         Thread thread = new Thread(this::run);
         thread.start();
-        //Thread thread2 = new Thread(this::clock);
-        //thread2.start();
     }
 
     public void stop() {
